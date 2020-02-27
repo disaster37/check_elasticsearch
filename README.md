@@ -3,7 +3,6 @@
 [![GoDoc](https://godoc.org/github.com/disaster37/check_elasticsearch?status.svg)](http://godoc.org/github.com/disaster37/check_elasticsearch)
 [![codecov](https://codecov.io/gh/disaster37/check_elasticsearch/branch/7.x/graph/badge.svg)](https://codecov.io/gh/disaster37/check_elasticsearch/branch/7.x)
 
-
 # check_elasticsearch
 Nagios plugin to check the healtch of Elasticsearch cluster
 
