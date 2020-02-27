@@ -21,11 +21,11 @@ func (s *CheckESTestSuite) SetupSuite() {
 	logrus.SetLevel(logrus.DebugLevel)
 
 	// Init client
-	//address := os.Getenv("ELASTICSEARCH_URL")
+	url := os.Getenv("ELASTICSEARCH_URL")
 	username := os.Getenv("ELASTICSEARCH_USERNAME")
 	password := os.Getenv("ELASTICSEARCH_PASSWORD")
 
-	monitorES, err := NewCheckES("http://localhost:9200", username, password, false)
+	monitorES, err := NewCheckES(url, username, password, false)
 	if err != nil {
 		panic(err)
 	}
