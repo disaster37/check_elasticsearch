@@ -3,6 +3,7 @@ package checkes
 import (
 	"context"
 	"strings"
+	"time"
 
 	nagiosPlugin "github.com/disaster37/go-nagios"
 	"github.com/stretchr/testify/assert"
@@ -25,6 +26,7 @@ func (s *CheckESTestSuite) TestCheckSLMError() {
 		`),
 		checkES.client.API.Snapshot.CreateRepository.WithContext(context.Background()),
 	)
+	time.Sleep(10 * time.Second)
 	monitoringData, err := s.monitorES.CheckSLMError("snapshot")
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), monitoringData)
