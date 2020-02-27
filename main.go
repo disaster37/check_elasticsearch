@@ -55,7 +55,7 @@ func run(args []string) error {
 		},
 	}
 	app.Commands = []*cli.Command{
-		&cli.Command{
+		{
 			Name:     "check-ilm-indice",
 			Usage:    "Check the ILM on specific indice. Set indice _all to check all ILM policies",
 			Category: "ILM",
@@ -71,13 +71,13 @@ func run(args []string) error {
 			},
 			Action: checkes.CheckILMError,
 		},
-		&cli.Command{
+		{
 			Name:     "check-ilm-status",
 			Usage:    "Check that ILM is running",
 			Category: "ILM",
 			Action:   checkes.CheckILMStatus,
 		},
-		&cli.Command{
+		{
 			Name:     "check-repository-snapshot",
 			Usage:    "Check snapshots state on repository",
 			Category: "SLM",
@@ -89,13 +89,13 @@ func run(args []string) error {
 			},
 			Action: checkes.CheckSLMError,
 		},
-		&cli.Command{
+		{
 			Name:     "check-slm-status",
 			Usage:    "Check that SLM service is running",
 			Category: "SLM",
 			Action:   checkes.CheckSLMStatus,
 		},
-		&cli.Command{
+		{
 			Name:     "check-indice-locked",
 			Usage:    "Check if there are indice locked. You can use _all as indice name to check all indices",
 			Category: "Indice",

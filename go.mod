@@ -9,6 +9,7 @@ require (
 	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/pkg/errors v0.8.1
 	github.com/sirupsen/logrus v1.4.2
+	github.com/stretchr/testify v1.2.2
 	github.com/urfave/cli/v2 v2.1.1
 	github.com/x-cray/logrus-prefixed-formatter v0.5.2
 	golang.org/x/crypto v0.0.0-20200221231518-2aa609cf4a9d // indirect

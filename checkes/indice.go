@@ -11,22 +11,22 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-type IndicesSettingResponse struct {
-	IndiceSettingResponse map[string]IndiceSettingResponse
-}
-
+// IndiceSettingResponse is API response
 type IndiceSettingResponse struct {
-	Settings *IndiceSettings `json:"settings,omitempty"`
+	Settings *IndiceSettings `json:"settings"`
 }
 
+// IndiceSettings is API response
 type IndiceSettings struct {
-	Indice *IndiceSetting `json:"index,omitempty"`
+	Indice *IndiceSetting `json:"index"`
 }
 
+// IndiceSetting is API response
 type IndiceSetting struct {
 	Blocks *IndiceSettingBlock `json:"blocks,omitempty"`
 }
 
+// IndiceSettingBlock is API response
 type IndiceSettingBlock struct {
 	Read                string `json:"read,omitempty"`
 	ReadOnlyAllowDelete string `json:"read_only_allow_delete,omitempty"`
@@ -34,7 +34,7 @@ type IndiceSettingBlock struct {
 	Write               string `json:"write,omitempty"`
 }
 
-// CheckSLMError wrap command line to check
+// CheckIndiceLocked wrap command line to check
 func CheckIndiceLocked(c *cli.Context) error {
 
 	monitorES, err := manageElasticsearchGlobalParameters(c)
@@ -88,17 +88,19 @@ func (h *CheckES) CheckIndiceLocked(indiceName string) (*nagiosPlugin.Monitoring
 		return nil, err
 	}
 	log.Debugf("Get indice setting %s successfully:\n%s", indiceName, string(b))
-	indicesSettingResponse := &IndicesSettingResponse{}
-	err = json.Unmarshal(b, indicesSettingResponse)
+	indicesSettingResponse := map[string]IndiceSettingResponse{}
+	err = json.Unmarshal(b, &indicesSettingResponse)
 	if err != nil {
 		return nil, err
 	}
+	log.Debugf("Index settings: %+v", indicesSettingResponse)
 
 	// Check if there are index that are read only by security
 	brokenIndices := make([]string, 0)
 	nbIndice := 0
-	for indiceName, indiceSetting := range indicesSettingResponse.IndiceSettingResponse {
-		if indiceSetting.Settings.Indice.Blocks.ReadOnlyAllowDelete == "true" {
+	for indiceName, indiceSetting := range indicesSettingResponse {
+		log.Debugf("%s: %+v", indiceName, indiceSetting)
+		if indiceSetting.Settings.Indice.Blocks != nil && indiceSetting.Settings.Indice.Blocks.ReadOnlyAllowDelete == "true" {
 			brokenIndices = append(brokenIndices, indiceName)
 		}
 		nbIndice++
@@ -106,14 +108,14 @@ func (h *CheckES) CheckIndiceLocked(indiceName string) (*nagiosPlugin.Monitoring
 
 	if len(brokenIndices) > 0 {
 		monitoringData.SetStatus(nagiosPlugin.STATUS_CRITICAL)
-		monitoringData.AddMessage("There are some indice in security state (%d/%d)", nbIndice-len(brokenIndices), nbIndice)
+		monitoringData.AddMessage("There are some indice locked (%d/%d)", nbIndice-len(brokenIndices), nbIndice)
 		for _, indiceName := range brokenIndices {
 			monitoringData.AddMessage("\tIndice %s", indiceName)
 		}
 
 	} else {
 		monitoringData.SetStatus(nagiosPlugin.STATUS_OK)
-		monitoringData.AddMessage("No indice in security state (%d/%d", nbIndice, nbIndice)
+		monitoringData.AddMessage("No indice locked (%d/%d)", nbIndice, nbIndice)
 	}
 
 	monitoringData.AddPerfdata("nbIndices", nbIndice, "")

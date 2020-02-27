@@ -37,7 +37,7 @@ func manageElasticsearchGlobalParameters(c *cli.Context) (MonitorES, error) {
 }
 
 //NewCheckES permit to initialize connexion on Elasticsearch cluster
-func NewCheckES(URL string, username string, password string, disableTLSVerification bool) (*CheckES, error) {
+func NewCheckES(URL string, username string, password string, disableTLSVerification bool) (MonitorES, error) {
 
 	if URL == "" {
 		return nil, errors.New("URL can't be empty")

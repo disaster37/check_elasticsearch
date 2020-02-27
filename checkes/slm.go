@@ -197,12 +197,12 @@ func (h *CheckES) CheckSLMStatus() (*nagiosPlugin.Monitoring, error) {
 
 	if slmStatusResponse.OperationMode == "RUNNING" {
 		monitoringData.SetStatus(nagiosPlugin.STATUS_OK)
-		monitoringData.AddMessage("SLM status is running")
+		monitoringData.AddMessage("SLM service is running")
 		return monitoringData, nil
 	}
 
 	monitoringData.SetStatus(nagiosPlugin.STATUS_CRITICAL)
-	monitoringData.AddMessage("SLM status is not running: %s", slmStatusResponse.OperationMode)
+	monitoringData.AddMessage("SLM service is not running: %s", slmStatusResponse.OperationMode)
 
 	return monitoringData, nil
 }
