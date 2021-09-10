@@ -6,7 +6,7 @@ import (
 	"net/http"
 
 	"github.com/disaster37/go-nagios"
-	elastic "github.com/elastic/go-elasticsearch/v8"
+	elastic "github.com/elastic/go-elasticsearch/v7"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
