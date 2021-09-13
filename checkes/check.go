@@ -24,6 +24,7 @@ type MonitorES interface {
 	CheckSLMError(snapshotRepositoryName string) (*nagiosPlugin.Monitoring, error)
 	CheckSLMStatus() (*nagiosPlugin.Monitoring, error)
 	CheckIndiceLocked(indiceName string) (*nagiosPlugin.Monitoring, error)
+	CheckTransformError(transformName string, excludeTransforms []string) (*nagiosPlugin.Monitoring, error)
 }
 
 func manageElasticsearchGlobalParameters(c *cli.Context) (MonitorES, error) {

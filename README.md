@@ -139,3 +139,26 @@ Response:
 OK - No snapshot on repository snapshot|NbSnapshot=0;;;; NbSnapshotFailed=0;;;;
 ```
 
+### Check Transform errors
+
+Command `check-transform` permit to check if tranform failed.
+If you should to check all tranform, you can put `_all` as transform name.
+
+You need to set the following parameters:
+- **--name**: The transform name
+- **--exclude**: (optional) The transform name you should to exclude
+
+It return the following perfdata:
+- **nbTransformFailed**: the number of transform failed
+- **nbTransformStarted**: the number of transform started
+- **nbTransformStopped**: the number of transform stopped
+
+Sample of command:
+```bash
+./check_elasticsearch --url http://localhost:9200 --user elastic --password changeme check-transform --name _all
+```
+
+Response:
+```bash
+OK - No error found on indice _all|NbIndiceFailed=0;;;; 
+```

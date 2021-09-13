@@ -107,6 +107,22 @@ func run(args []string) error {
 			},
 			Action: checkes.CheckIndiceLocked,
 		},
+		{
+			Name:     "check-transform",
+			Usage:    "Check that Transform have not in error state",
+			Category: "Transform",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "name",
+					Usage: "The transform id or empty for check all transform",
+				},
+				&cli.StringSliceFlag{
+					Name:  "exclude",
+					Usage: "The transform id to exclude",
+				},
+			},
+			Action: checkes.CheckTransformError,
+		},
 	}
 
 	app.Before = func(c *cli.Context) error {
