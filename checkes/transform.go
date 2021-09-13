@@ -123,7 +123,11 @@ func (h *CheckES) CheckTransformError(transformName string, excludeTransforms []
 	monitoringData.AddPerfdata("nbTransformStarted", nbTransformStarted, "")
 
 	if monitoringData.Status() == nagiosPlugin.STATUS_OK {
-		monitoringData.AddMessage("All transform works fine")
+		if transformName == "_all" || transformName == "*" {
+			monitoringData.AddMessage("All transform works fine")
+		} else {
+			monitoringData.AddMessage("Transform %s works fine", transformName)
+		}
 	}
 
 	return monitoringData, nil
