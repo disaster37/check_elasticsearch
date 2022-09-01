@@ -47,8 +47,8 @@ jobs:
           CIRCLE_TAG: $CIRCLE_TAG
     steps:
       - checkout
-      - run: go get github.com/mitchellh/gox
-      - run: go get github.com/tcnksm/ghr
+      - run: go install github.com/mitchellh/gox@latest
+      - run: go install github.com/tcnksm/ghr@latest
       - run: sed -i 's/app.Version := "develop"/app.Version := "$CIRCLE_TAG"/' main.go
       - run: gox -os="freebsd darwin linux windows" -arch "amd64" -osarch="linux/386 windows/386" -parallel=1  -output "dist/check_elasticsearch_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}"
       - run: CGO_ENABLED=0 gox -os="freebsd darwin linux windows" -arch "amd64" -osarch="linux/386 windows/386" -parallel=1 -output "dist/check_elasticsearch_${CIRCLE_TAG}_{{.OS}}_{{.Arch}}_static"
