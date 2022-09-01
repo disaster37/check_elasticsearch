@@ -37,6 +37,45 @@ func (s *CheckESTestSuite) TestCheckSLMError() {
 	assert.Equal(s.T(), nagiosPlugin.STATUS_UNKNOWN, monitoringData.Status())
 }
 
+func (s *CheckESTestSuite) TestCheckSLMPolicy() {
+
+	// When reposiotry exist
+	checkES := s.monitorES.(*CheckES)
+	checkES.client.API.SlmPutLifecycle(
+		"test",
+		checkES.client.API.SlmPutLifecycle.WithBody(
+			strings.NewReader(`
+			{
+				"schedule": "0 30 1 * * ?", 
+				"name": "<daily-snap-{now/d}>", 
+				"repository": "snapshot", 
+				"config": { 
+					"indices": ["data-*", "important"], 
+					"ignore_unavailable": false,
+					"include_global_state": false
+				},
+				"retention": { 
+					"expire_after": "30d", 
+					"min_count": 5, 
+					"max_count": 50 
+				}
+			}
+		`),
+		),
+		checkES.client.API.SlmPutLifecycle.WithContext(context.Background()),
+	)
+	monitoringData, err := s.monitorES.CheckSLMPolicy("")
+	assert.NoError(s.T(), err)
+	assert.NotNil(s.T(), monitoringData)
+	assert.Equal(s.T(), nagiosPlugin.STATUS_OK, monitoringData.Status())
+
+	// When repository not exist
+	monitoringData, err = s.monitorES.CheckSLMPolicy("foo")
+	assert.NoError(s.T(), err)
+	assert.NotNil(s.T(), monitoringData)
+	assert.Equal(s.T(), nagiosPlugin.STATUS_UNKNOWN, monitoringData.Status())
+}
+
 func (s *CheckESTestSuite) TestCheckSLMStatus() {
 
 	checkES := s.monitorES.(*CheckES)

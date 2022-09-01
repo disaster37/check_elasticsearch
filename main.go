@@ -90,6 +90,18 @@ func run(args []string) error {
 			Action: checkes.CheckSLMError,
 		},
 		{
+			Name:     "check-slm-policy",
+			Usage:    "Check SLM policy",
+			Category: "SLM",
+			Flags: []cli.Flag{
+				&cli.StringFlag{
+					Name:  "name",
+					Usage: "The policy name",
+				},
+			},
+			Action: checkes.CheckSLMPolicy,
+		},
+		{
 			Name:     "check-slm-status",
 			Usage:    "Check that SLM service is running",
 			Category: "SLM",

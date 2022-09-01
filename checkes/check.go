@@ -23,6 +23,7 @@ type MonitorES interface {
 	CheckILMStatus() (*nagiosPlugin.Monitoring, error)
 	CheckSLMError(snapshotRepositoryName string) (*nagiosPlugin.Monitoring, error)
 	CheckSLMStatus() (*nagiosPlugin.Monitoring, error)
+	CheckSLMPolicy(policyName string) (*nagiosPlugin.Monitoring, error)
 	CheckIndiceLocked(indiceName string) (*nagiosPlugin.Monitoring, error)
 	CheckTransformError(transformName string, excludeTransforms []string) (*nagiosPlugin.Monitoring, error)
 }

@@ -9,9 +9,11 @@ import (
 	"time"
 
 	"github.com/disaster37/go-nagios"
+	"github.com/elastic/go-elasticsearch/v7/esapi"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"github.com/urfave/cli/v2"
+	"github.com/vtopc/epoch"
 )
 
 // SnapshotsResponse is the API response
@@ -44,6 +46,19 @@ type SLMStatusResponse struct {
 	OperationMode string `json:"operation_mode,omitempty"`
 }
 
+type SLMResponse map[string]*SLM
+
+type SLM struct {
+	LastSuccess *SLMStatus `json:"last_success,omitempty"`
+	LastFailure *SLMStatus `json:"last_failure,omitempty"`
+}
+
+type SLMStatus struct {
+	SnapshotName string `json:"snapshot_name"`
+	Time epoch.Milliseconds `json:"time"`
+	Details string `json:"details,omitempty"`
+}
+
 // CheckSLMError wrap command line to check
 func CheckSLMError(c *cli.Context) error {
 
@@ -57,6 +72,24 @@ func CheckSLMError(c *cli.Context) error {
 	}
 
 	monitoringData, err := monitorES.CheckSLMError(c.String("repository"))
+	if err != nil {
+		return err
+	}
+	monitoringData.ToSdtOut()
+
+	return nil
+
+}
+
+// CheckSLMPolicy wrap command line to check
+func CheckSLMPolicy(c *cli.Context) error {
+
+	monitorES, err := manageElasticsearchGlobalParameters(c)
+	if err != nil {
+		return err
+	}
+
+	monitoringData, err := monitorES.CheckSLMPolicy(c.String("name"))
 	if err != nil {
 		return err
 	}
@@ -203,6 +236,91 @@ func (h *CheckES) CheckSLMStatus() (*nagiosPlugin.Monitoring, error) {
 
 	monitoringData.SetStatus(nagiosPlugin.STATUS_CRITICAL)
 	monitoringData.AddMessage("SLM service is not running: %s", slmStatusResponse.OperationMode)
+
+	return monitoringData, nil
+}
+
+// CheckSLMPolicy check that there are no SLM policy failed
+func (h *CheckES) CheckSLMPolicy(policyName string) (*nagiosPlugin.Monitoring, error) {
+
+	var(
+		res *esapi.Response
+		err error
+	)
+
+	log.Debugf("policyName: %s", policyName)
+	monitoringData := nagiosPlugin.NewMonitoring()
+
+
+	if policyName == "" {
+		res, err = h.client.API.SlmGetLifecycle(
+			h.client.API.SlmGetLifecycle.WithContext(context.Background()),
+			h.client.API.SlmGetLifecycle.WithPretty(),
+		)
+	} else {
+		res, err = h.client.API.SlmGetLifecycle(
+			h.client.API.SlmGetLifecycle.WithPolicyID(policyName),
+			h.client.API.SlmGetLifecycle.WithContext(context.Background()),
+			h.client.API.SlmGetLifecycle.WithPretty(),
+		)
+	}
+	if err != nil {
+		return nil, err
+	}
+	
+	
+	defer res.Body.Close()
+	if res.IsError() {
+		if res.StatusCode == 404 {
+			monitoringData.SetStatus(nagiosPlugin.STATUS_UNKNOWN)
+			monitoringData.AddMessage("Policy %s not found", policyName)
+			return monitoringData, nil
+		}
+		return nil, errors.Errorf("Error when get SLM %s: %s", policyName, res.String())
+	}
+	b, err := ioutil.ReadAll(res.Body)
+	if err != nil {
+		return nil, err
+	}
+	log.Debugf("Get SLM %s successfully:\n%s", policyName, string(b))
+	slmResponse := make(SLMResponse)
+	err = json.Unmarshal(b, &slmResponse)
+	if err != nil {
+		return nil, err
+	}
+
+	// Check if there are some SLM policy failed
+	if len(slmResponse) == 0 {
+		monitoringData.SetStatus(nagiosPlugin.STATUS_OK)
+		monitoringData.AddMessage("No SLM policy %s", policyName)
+		monitoringData.AddPerfdata("NbSLMPolicyt", 0, "")
+		monitoringData.AddPerfdata("NbSLMPolicyFailed", 0, "")
+		return monitoringData, nil
+	}
+
+	nbSLMPolicy := 0
+	slmPoliciesFailed := make(map[string]*SLM)
+	monitoringData.SetStatus(nagiosPlugin.STATUS_OK)
+	for name, policy := range slmResponse {
+		nbSLMPolicy++
+		if policy.LastFailure != nil {
+			if policy.LastSuccess == nil || policy.LastFailure.Time.After(policy.LastSuccess.Time.Time) {
+					monitoringData.SetStatus(nagiosPlugin.STATUS_CRITICAL)
+					slmPoliciesFailed[name] = policy
+			}
+		}
+	}
+	if len(slmPoliciesFailed) > 0 {
+		monitoringData.AddMessage("Some SLM policies failed (%d/%d)", nbSLMPolicy-len(slmPoliciesFailed), nbSLMPolicy)
+		for name, policyFailed := range slmPoliciesFailed {
+			monitoringData.AddMessage("SLM policy %s failed on snapshot %s at %s: %s", name, policyFailed.LastFailure.SnapshotName, policyFailed.LastFailure.Time, policyFailed.LastFailure.Details)
+		}
+	} else {
+		monitoringData.AddMessage("All SLM policies are ok (%d/%d)", nbSLMPolicy, nbSLMPolicy)
+	}
+
+	monitoringData.AddPerfdata("NbSLMPolicy", nbSLMPolicy, "")
+	monitoringData.AddPerfdata("NbSLMPolicyFailed", len(slmPoliciesFailed), "")
 
 	return monitoringData, nil
 }
