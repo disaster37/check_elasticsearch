@@ -139,6 +139,27 @@ Response:
 OK - No snapshot on repository snapshot|NbSnapshot=0;;;; NbSnapshotFailed=0;;;;
 ```
 
+### Check if there are SLM policies errors
+
+Command `check-slm-policy` permit to check if there are SLM policies error.
+
+You can to set the following parameters if you should to check only one policy:
+- **--name**: The policy name you should to check
+
+It return the following perfdata:
+- **nbSLMPolicy**: the number of SLM policy
+- **nbSLMPolicyFailed**: the number of failed SLM policy
+
+Sample of command:
+```bash
+./check_elasticsearch --url http://localhost:9200 --user elastic --password changeme check-slm-policy
+```
+
+Response:
+```bash
+OK - All SLM policies are ok (1/1)|NbSLMPolicy=1;;;; NbSLMPolicyFailed=0;;;;
+```
+
 ### Check Transform errors
 
 Command `check-transform` permit to check if tranform failed.
