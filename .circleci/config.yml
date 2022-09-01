@@ -14,7 +14,7 @@ jobs:
           ELASTICSEARCH_USERNAME: "elastic"
           ELASTICSEARCH_PASSWORD: "changeme"
           KIBANA_URL: http://kb:5601
-      - image: docker.elastic.co/elasticsearch/elasticsearch:7.5.1
+      - image: docker.elastic.co/elasticsearch/elasticsearch:7.16.3
         name: es
         environment:
           cluster.name: test
@@ -22,7 +22,7 @@ jobs:
           ELASTIC_PASSWORD: changeme
           xpack.security.enabled: "true"
           path.repo: "/tmp"
-    working_directory: /go/check_elasticsearch
+    working_directory: /project/check_elasticsearch
     steps:
       - checkout
       - run: until $(curl --output /dev/null --silent --head --fail -u elastic:changeme http://es:9200); do sleep 5; done
@@ -35,7 +35,7 @@ jobs:
   build:
     docker:
       - image: cimg/go:1.18
-    working_directory: /go/check_elasticsearch
+    working_directory: /project/check_elasticsearch
     steps:
       - checkout
       - run: go build
@@ -47,7 +47,7 @@ jobs:
           CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME
           CIRCLE_PROJECT_REPONAME: $CIRCLE_PROJECT_REPONAME
           CIRCLE_TAG: $CIRCLE_TAG
-    working_directory: /go/check_elasticsearch
+    working_directory: /project/check_elasticsearch
     steps:
       - checkout
       - run: go get github.com/mitchellh/gox
