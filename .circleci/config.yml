@@ -8,7 +8,7 @@ orbs:
 jobs:
   test:
     docker:
-      - image: circleci/golang:1.18
+      - image: cimg/go:1.18
         environment:
           ELASTICSEARCH_URL: "http://es:9200"
           ELASTICSEARCH_USERNAME: "elastic"
@@ -34,14 +34,14 @@ jobs:
           flags: unittest
   build:
     docker:
-      - image: circleci/golang:1.18
+      - image: cimg/go:1.18
     working_directory: /go/check_elasticsearch
     steps:
       - checkout
       - run: go build
   release:
     docker:
-      - image: circleci/golang:1.18
+      - image: cimg/go:1.18
         environment:
           GITHUB_TOKEN: $GITHUB_TOKEN
           CIRCLE_PROJECT_USERNAME: $CIRCLE_PROJECT_USERNAME
